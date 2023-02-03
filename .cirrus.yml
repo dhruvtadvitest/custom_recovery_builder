@@ -1,0 +1,11 @@
+
+task:
+  name: "Recovery Builder"
+  timeout_in: 120m
+  container:
+      image: archlinux/archlinux:latest
+      cpu: 8
+      memory: 20G
+
+  Testing:
+      - sudo pacman -Syyu
