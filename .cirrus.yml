@@ -9,3 +9,4 @@ task:
 
   Testing:
       - sudo pacman -Syyu
+      - pacman -Syy telegram-desktop
