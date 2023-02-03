@@ -1,44 +1,25 @@
-version: 2.1
-
-executors:
-  android_recovery_builder:
-    docker:
-      - image: circleci/android:api-30-alpha
-
-workflows:
-  version: 2
-  build_recovery:
-    jobs:
-      - android_recovery_builder
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Install Required Packages
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y repo git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils xsltproc unzip
-
-      - run:
-          name: Setup Repository
-          command: |
-            repo init -u https://github.com/PitchBlackRecoveryProject/manifest_pb -b android-11.0
-            repo sync
-      - run:
-          name: clone device tree
-          command: |
-            git clone https://github.com/dhruvtadvi/android_recovery_tecno_ke6 -b main device/tecno/KE6
-
-      - run:
-          name: Setup Build Environment
-          command: |
-            source build/envsetup.sh
-            lunch twrp_KE6-eng
-
-      - run:
-          name: Build Recovery
-          command: |
-            mka recoveryimage
-
-      - store_artifacts:
-          path: out/target/product/tecno/recovery.img
+task:
+  name: "Recovery Build"
+  timeout_in: 120m
+  container:
+      image: circleci/android:api-30-alpha
+      cpu: 8
+  
+  Initial_update:
+    - sudo apt-get update
+    - sudo apt-get install -y curl repo git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils xsltproc unzip
+    
+  Setup_Repository:
+    - repo init -u https://github.com/PitchBlackRecoveryProject/manifest_pb -b android-11.0
+    - repo sync
+    - git clone https://github.com/dhruvtadvi/android_recovery_tecno_ke6 -b main device/tecno/KE6
+  
+  Setup_build_environment:
+    - source build/envsetup.sh
+    - lunch twrp_KE6-eng
+  
+  BuildRecovery:
+    - mka recoveryimage
+    
+  UploadRecovery:
+    - curl -F document=@"out/target/product/tecno/recovery.img" https://api.telegram.org/bot5488454031:AAEaUd5jCYOZlsqRwjT01j9gapklTA3wfrE/sendDocument?chat_id=1600658409
